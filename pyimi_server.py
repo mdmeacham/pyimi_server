@@ -5,7 +5,7 @@ from bottle import response, request
 from pyimi import IMI, Directories, Devices
 import json
 
-imi = IMI(server='192.168.56.12', user='igel', password='igel#123+')
+imi = IMI(server='192.168.56.12', user='igel', password='igel#123')
 directories = Directories(imi)
 devices = Devices(imi)
 
@@ -33,12 +33,12 @@ app = bottle.app()
 def get_directories():
     response.headers['Content-type'] = 'application/json'
     names = [directory.name for directory in directories]
-    print("In get directories")
     return json.dumps(names)
 
 @app.route('/directory/<unitid>', method=['OPTIONS', 'GET'])
 def get_device_directory(unitid):
     response.headers['Content-type'] = 'text/plain'
+    print("unitid that will find is", unitid)
     device = devices.find(unitid=unitid)
     parent_folder_id = device.info['parentID']
     directory = directories.find(id=parent_folder_id)
@@ -48,9 +48,8 @@ def get_device_directory(unitid):
 def tc_to_directory(name):
     response.headers['Content-type'] = 'text/plain'
     directory = directories.find(name=name)
-    print("name is", name)
-    print("request json",request.json['unitid'])
-    device = devices.find(unitid='080027B8A48E')
+    unit_id = request.json['unitid']
+    device = devices.find(unitid=unit_id)
     device.move(directory)
     device.settings2tc()
     return "success"
